@@ -1,0 +1,11 @@
+import os
+import time
+from bready.autovehicle_utils.autovehicleControlClient import AutoVehicleControlClient
+
+vehicle_server = AutoVehicleControlClient("127.0.0.1", 8886)
+time.sleep(3)
+for i in range(0,5):
+  print(vehicle_server.readBattery())
+  time.sleep(1)
+vehicle_server.disconnect()
+vehicle_server.close()

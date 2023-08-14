@@ -1,0 +1,25 @@
+import os
+import time
+from bready.autovehicle_utils.autovehicleControlClient import AutoVehicleControlClient
+
+vehicle_server = AutoVehicleControlClient("127.0.0.1", 8886)
+time.sleep(3)
+
+vehicle_server.controlDirection(int(90))
+vehicle_server.sendData()
+time.sleep(1)
+
+vehicle_server.controlDirection(int(180))
+vehicle_server.sendData()
+time.sleep(1)
+
+vehicle_server.controlDirection(int(90))
+vehicle_server.sendData()
+time.sleep(1)
+
+vehicle_server.controlDirection(int(0))
+vehicle_server.sendData()
+time.sleep(1)
+
+vehicle_server.disconnect()
+vehicle_server.close()

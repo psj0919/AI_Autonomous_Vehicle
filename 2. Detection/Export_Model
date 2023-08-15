@@ -1,0 +1,7 @@
+import os
+from bready.object_detection_tools import ObjectDetector
+
+detection_trainer = ObjectDetector.Trainer()
+detection_trainer.setSaveModelDirectory("V_detect1_models")
+
+detection_trainer.freeze_graph(checkpoints=150, output_directory="V_detect1_inference", overwrite=True)

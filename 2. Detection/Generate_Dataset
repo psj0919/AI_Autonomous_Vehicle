@@ -1,0 +1,11 @@
+import os
+from bready.object_detection_tools import ObjectDetector
+
+detection_trainer = ObjectDetection.Trainer()
+detection_trainer.setImageDirectory(" image 경로" )
+detection_trainer.setAnnotationDirectory(" Annotation 경로" )
+detection_trainer.setClassPath(" class_path" )
+
+detection_trainer.setDataDirectory("V_detect1_train")   #학습 데이터를 저장할 경로
+detection_trainer.generateTFRecords() #학습 데이터셋을 제작
+

@@ -1,0 +1,35 @@
+import os
+import cv2
+import time
+import bready.camera_utils.PyCamera as Pycamera
+from bready.object_detection_tools import ObjectDetector
+import ipywidgets.widgets as widgets
+import IPython.display
+
+detection_tester = objectDetector.Tester("V_detect1_inference", "C:/ 클래스 파일 경로")
+camera = PyCamera.USBCamera(0,640,360, DSHOW_OPTION=False) #카메라 포트번호 :0, 카메라 해상도 640*360 으로 설정
+image_widget = widgets.Image(format='jpeg')
+IPython.display.display(image_widget)
+try:
+    while(True):
+        frame = camera.get_frame()
+        if(not camera.isOpened()):
+          break
+        detection_tester.execute(frame)
+        result_image = detection_tester.getResultImage()
+        image_widget.value = cv2.imencode("jpeg", result_image)[1].tostring()
+        time.sleep(0.001)
+except KeyboardInterrupt:
+  pass
+
+except Exception as e:
+  import traceback
+  traceback.print_exc()
+  print(e)
+
+finally:
+  print("종료")
+
+camera.dispose()
+detection_tester.dispose()
+

@@ -1,0 +1,11 @@
+import os 
+from bready.object_detection_tools import ObjectDetector
+
+detection_trainer = ObjectDetector.Trainer()
+detection_trainer.setDataDirectory("V_detect1_train")
+detection_trainer.setSaveModelDirectory("V_detect1_models")
+detection_trainer.setMaxSteps(150)  #,epoch
+detection_trainer.setBatchSize(24) # batch_size
+detection_trainer.setAugmentation_Option(ObjectDetector.Image_Augmentation.SSD_RANDOM_CROP, True)
+detection_trainer.train(continue_training=False, overwrite= True)
+detection_trainer.dispose()

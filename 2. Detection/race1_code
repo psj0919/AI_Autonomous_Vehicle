@@ -1,0 +1,61 @@
+import os
+import cv2
+import time
+import math
+
+import bready.camera_utils.PyCamera as PyCamera
+from bready.road_following_tools import RoadFollower
+from bready.object_detection_tools import ObjectDetector
+from bready.autovehicle_utils.autovehicleControlClient import AutoVehicleControlClient
+from bready.autovehicle_utils.PID_Controller import PID_controller
+
+import ipywidgets.widgets as widgets
+import IPython.display
+
+vehicle_server = AutoVehicleControlClient("127.0.0.1",8886)
+road_model
+RoadFollower.Tester("/home/bready/AutoVehicle_Server/AI_models/road_following/models_xavier")
+road_model.setAugmentation_Option(RoadFollower.Image_Augmentation.HALF_BLACK, True)
+obj_model = ObjectDetector.Tester("V_detect1_final", "V_detect1_classes.txt")
+print(obj_model.getDetectableClassList())
+camera = PyCamera.URLCamera("tcp://127.0.0.1:5000")
+pid_Degree = None
+
+import configparser
+config = configparser.ConfigParser()
+config.read("/home/bready/AutoVehicle_Server/setting/autovehicle.ini")
+
+if(pid_Degree is not None):
+  pid_Degree.Kp = float(config["ai_pid]["p_gain"])
+  pid_Degree.Ki = float(config["ai_pid]["i_gain"])
+  pid_Degree.Kd = float(config["ai_pid]["d_gain"])
+else:
+  pid_Degree = PID_Controller(float(config["ai_pid]["p_gain"]),float(config["ai_pid]["i_gain"]),float(config["ai_pid]["d_gain"]), -30, 30)
+pid_Degree.set_SamplingTime(0.1)
+target_stop_acc = 0.8
+crosswalk_detected = False
+stop_sign_flag = False
+stop_at_stopline_flag = False
+stop_at_stopline_time = 0
+prev_DegreeError = 0
+image_widget1 = widgets.Image(format = 'jpeg')
+image_widget2 = widgets.Image(format = 'jpeg')
+IPython.display.display(widgets.HBox([image_widget1, images_widget2]))
+try:
+    while True:
+      frame = camera.get_frame()
+      if(not camera.isOpened()):
+        break
+      obj_model.excute(frame)
+      road_model.execute(frame)
+      speed_value = 100
+      steering_value = 90
+      for i in obj_model.getDetectedList():
+          if i['detection_names'] == 'crosswalk' and i['detection_width'] <= 0.5:
+              if crosswalk_detected ==False:
+                crosswalk_deteted = True
+                corsswalk_time = time.time()
+
+
+        
+  

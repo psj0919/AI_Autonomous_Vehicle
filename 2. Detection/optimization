@@ -1,0 +1,4 @@
+from bready.object_detection_tools.lib.optimization_tools import optimizer
+
+optimizer.convertToOptimizationModel("V_detect1_inference", "V_detect1_finale", precision_mode= "FP16", mode = "tensorrt")
+#위의 코드를 통해서 학습 모델을 장비에 장착된 jetson 보드에 적합하도록 최적화 시킨다. 각 파라미터는 순서대로 학습 모델의 경로, 최적화 시킨모델을 저장할 경로.

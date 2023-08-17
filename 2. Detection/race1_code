@@ -14,8 +14,7 @@ import ipywidgets.widgets as widgets
 import IPython.display
 
 vehicle_server = AutoVehicleControlClient("127.0.0.1",8886)
-road_model
-RoadFollower.Tester("/home/bready/AutoVehicle_Server/AI_models/road_following/models_xavier")
+road_model = RoadFollower.Tester("/home/bready/AutoVehicle_Server/AI_models/road_following/models_xavier")
 road_model.setAugmentation_Option(RoadFollower.Image_Augmentation.HALF_BLACK, True)
 obj_model = ObjectDetector.Tester("V_detect1_final", "V_detect1_classes.txt")
 print(obj_model.getDetectableClassList())

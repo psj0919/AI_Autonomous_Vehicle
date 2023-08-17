@@ -1,0 +1,92 @@
+#좌회전, 우회전에 대한 코드
+import os
+import cv2
+import time
+import math
+
+import bready.camera_utils.PyCamera as PyCamera
+from bready.road_following_tools import RoadFollower
+from bready.object_detection_tools import ObjectDetector
+from bready.autovehicle_utils.autovehicleControlClient import AutoVehicleControlClient
+from bready.autovehicle_utils.PID_Controller import PID_controller
+
+import ipywidgets.widgets as widgets
+import IPython.display
+
+vehicle_server = AutoVehicleControlClient("127.0.0.1",8886)
+road_model = RoadFollower.Tester("/home/bready/AutoVehicle_Server/AI_models/road_following/models_xavier")
+road_model.setAugmentation_Option(RoadFollower.Image_Augmentation.HALF_BLACK, True)
+obj_model = ObjectDetector.Tester("V_detect1_final", "V_detect1_classes.txt")
+print(obj_model.getDetectableClassList())
+camera = PyCamera.URLCamera("tcp://127.0.0.1:5000")
+pid_Degree = None
+
+import configparser
+config = configparser.ConfigParser()
+config.read("/home/bready/AutoVehicle_Server/setting/autovehicle.ini")
+
+if(pid_Degree is not None):
+  pid_Degree.Kp = float(config["ai_pid]["p_gain"])
+  pid_Degree.Ki = float(config["ai_pid]["i_gain"])
+  pid_Degree.Kd = float(config["ai_pid]["d_gain"])
+else:
+  pid_Degree = PID_Controller(float(config["ai_pid]["p_gain"]),float(config["ai_pid]["i_gain"]),float(config["ai_pid]["d_gain"]), -30, 30)
+pid_Degree.set_SamplingTime(0.1)
+left_turn_sign_detected_time = 0
+right_turn_sign_detected_time = 0
+prev_DegreeError = 0
+image_widget1 = widgets.Image(format = 'jpeg')
+image_widget2 = widgets.Image(format = 'jpeg')
+IPython.display.display(widgets.HBox([image_widget1, images_widget2]))
+
+try:
+    while True:
+      frame = camera.get_frame()
+      if(not camera.isOpened()):
+        break
+      obj_model.excute(frame)
+      road_model.execute(frame)
+      speed_value = 100
+      steering_value = 90
+for i in obj_model.getDetectedList2():
+    if i['detection_names'] == 'left_turn_sign' and i['detection_width'] >= 0.1 and i['detection_height] >= 0.1:
+          left_turn_sign_detected_time = time.time()
+          right_turn_sign_detected_time = 0
+    if i['detection_names'] == 'right_turn_sign' and i['detection_width'] >= 0.1 and i['detection_height] >= 0.1:
+          left_turn_sign_detected_time = 0
+          right_turn_sign_detected_time = time.time()
+  if time.time() - left_turn_sign_detected_time < 5:
+        x = (road_model.getDetectedValue(category_type='track',category_name='left'))[0]
+        y = (road_model.getDetectedValue(category_type='track',category_name='left'))[1]
+  elif time.time() - right_turn_sign_detected_time < 5:
+        x = (road_model.getDetectedValue(category_type='track',category_name='right'))[0]
+        y = (road_model.getDetectedValue(category_type='track',category_name='right'))[1]
+  else:
+        x = (road_model.getDetectedValue(category_type='track',category_name='middle'))[0]
+        y = (road_model.getDetectedValue(category_type='track',category_name='middle'))[1]
+  degreeError = math.atan2((1-y), x) /math.pi * 180 - 90
+  if prev_DegreeError > 0 and degree < 0 or prev_DegreeError < 0 and degreeError > 0:
+      pid_Degree.clearError()
+  prev_DegreeError = degreeError
+  steering_value = min(max((pid_Degree.getControlValue(degreeError)) * 3 + 90, 0), 180)
+  vehicle_server.controlMotor(int(speed_value))
+  vehicle_server.controlDirection(int(steering_value))
+  vehicle_server.sendData()
+  tmpStream = cv2.imencode(".jpeg", obj_model.getResultImage()[1].tostring())
+  image_widget1.value = tmpStream
+  tmpStream = cv2.imencode(".jpeg", road_model.getResultImage()[1].tostring())
+  image_widget2.value = tmpStream
+  time.sleep(0.001)
+
+except KeyboardInterrupt:
+  pass
+except Exception as e:
+  import traceback
+  traceback.print_exc()
+  print(e)
+finally:
+  vehicle_server.controlMotor(int(0))
+  vehicle_server.sendData()
+  print("종료")
+vehicle_server.disconnect()
+vehicle_server.close()

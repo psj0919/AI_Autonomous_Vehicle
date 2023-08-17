@@ -1,3 +1,4 @@
+#횡단보도, 정지 표지판에 대한 실행코드
 import os
 import cv2
 import time
